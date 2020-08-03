@@ -1,0 +1,45 @@
+CoordinatorLayout + AppBarLayout + CollapsingToolbarLayout的使用：
+    - doc: https://blog.csdn.net/fengyenom1/article/details/78551307 point 4
+    - 添加依赖:  implementation "androidx.coordinatorlayout:coordinatorlayout:1.1.0"
+                implementation 'com.google.android.material:material:1.1.0'
+    - activity_coordinator.xml: 如果不希望写带码实现标题的滚动隐藏，和AppBarLayout同级的滚动视图不可以是普通的ScrollView,
+     需要使用NestedScrollView,或者RecyclerView。猜测和NestedScrollingChild2， NestedScrollingChild3接口有关
+    - 项目中通过设置minHeight使tab layout位置固定, 监听AppBarLayout滚动，设置标题栏透明度
+    - CollapsingToolbarLayout的子元素, 没有Toolbar, 只是普通的TextView(只试过TextView)的话layout_collapseMode="pin"不生效,
+      视图还是会跟着滑出页面(原因待研究)
+    - CollapsingToolbarLayout + Toolbar： 给CollapsingToolbarLayout设置minHeight不生效，不论是在layout设置还是代码设置
+        - Root Cause:
+             CollapsingToolbarLayout在布局(onLayout)的过程中, 会设置minHeight, 代码设置的话会调用requestLayout触发onLayout,
+         所以CollapsingToolbarLayout的minHeight始终都是onLayout方法里设置的.
+        - 关键代码:
+            CollapsingToolbarLayout onLayout和ensureToolbar方法
+        - Summary:
+            存在Toolbar作为CollapsingToolbarLayout的直接子元素, 那么不管自己有没有单独设置minHeight, Toolbar的高度将作为CollapsingToolbarLayout
+        的minHeight.
+            存在Toolbar, 但是不是直接子元素, maybe孙子节点. 如果CollapsingToolbarLayout设置了toolbarId属性, 则包含了引用的Toolbar元素,
+        且是CollapsingToolbarLayout的直接子元素的视图高度将会作为CollapsingToolbarLayout的minHeight. 如果没有设置toolbarId, 视图将会一起滑动
+
+-------------------------------------------------------------------------------------------------------------------
+微信登录友盟实现：
+    - 添加依赖:
+      implementation 'com.umeng.umsdk:common:2.2.5'
+      implementation 'com.umeng.umsdk:share-core:7.0.2'
+      implementation 'com.umeng.umsdk:share-wx:7.0.2' （包含了tencent wechat android sdk）
+      implementation 'com.umeng.umsdk:share-qq:7.0.2'
+    - 初始化微信配置: WXAPIFactory通过Application，微信appid创建IWXAPI
+    - 添加WXEntryActivity，继承WXCallbackActivity(IWXAPIEventHandler)，重写onResp，在manifest文件中注册
+    - 通过IWXAPI发送SendAuth.Req请求
+    note: WXEntryActivity必须放在 包名 + wxapi + WXEntryActivity，尝试将WXEntryActivity放在其他目录下，会报找不到.wxapi.WXEntryActivity的error
+
+分享：友盟
+    - 可以通过UMShareAPI判断QQ，微信等是否已安装
+    - 通过ShareAction.share分享，ShareAction可添加callback， SHARE_MEDIA(WEIXIN,QQ...)， Image, link...
+    - 友盟内部通过UMWXHandler.shareTo方法调用IWXAPI实现分享, 方法体里WeiXinShareContent参数封装了ShareContent对象,
+     通过WeiXinShareContent.getWxMediaMessage方法将UM的action对象根据不同的share type封装成微信的WXMediaMessage对象
+    - 原生： https://www.jianshu.com/p/194f90fb4525
+以上都需要先配置友盟, 通过UMConfigure初始化，设置platform(WEIXIN,QQ...), 需要UM APP key, 微信，QQ app key, secret
+
+支付：微信, 支付宝流程类似
+    - post订单到server， 返回订单信息
+    - 根据订单号等信息call server， 由server调第三方支付的api返回prepay信息
+    - client通过prepay信息调用第三方支付SDK，由第三方支付的客户端应用调用其server完成支付
