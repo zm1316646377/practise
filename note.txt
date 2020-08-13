@@ -43,3 +43,22 @@ CoordinatorLayout + AppBarLayout + CollapsingToolbarLayout的使用：
     - post订单到server， 返回订单信息
     - 根据订单号等信息call server， 由server调第三方支付的api返回prepay信息
     - client通过prepay信息调用第三方支付SDK，由第三方支付的客户端应用调用其server完成支付
+
+-------------------------------------------------------------------------------------------------------------------
+音频播放: ExoPlayer
+    Usage:
+    - dependency: implementation 'com.google.android.exoplayer:exoplayer:2.11.7'
+    - layout文件中添加PlayerView控件, library中提供了exo_simple_player_view layout, 可以在自己工程中添加自定义player layout.
+      其中有一个android:id="@id/exo_controller_placeholder"的view, 这个是Controller placeholder的视图, 我们可以再自定义一个
+      exo_playback_control_view.xml的视图, 这个是真正的Controller视图, PlayerView在创建的时候会将真正的Controller替换placeholder;
+      也可以自己设计视图的drawable
+    - Note: 自定义layout文件名, layout中的view id要和library提供的layout的id保持一致. 并且一开始的时候Controller是被隐藏的, 只有在给
+      PlayerView设置了Player之后才会显示
+
+    Implementation:
+    - ExoPlayerImplInternal的doSomeWork方法会不停调用, 调用renderer.render开始播放
+    - MediaCodecAudioRenderer, MediaCodecRenderer, BaseRenderer: 负责读取音频数据, 由MediaCodec解码, 然后由MediaCodecAudioRenderer
+      将流数据交由audioSink处理, 最终写到audioTrack中.
+    - ProgressiveMediaPeriod: 持有dataSource信息, 内部类ExtractingLoadable的load方法是提取音频流的入口, 然后交由Extractor具体具体实现类
+      read方法处理. eg:Mp3Extractor.read(). Mp3Extractor通过extractorOutput.track()回调ProgressiveMediaPeriod, 返回一个trackOutput(SampleQueue)
+      对象, 然后trackOutput(SampleQueue)会从input source中读取数据, 媒体数据最终会保存在SampleDataQueue的AllocationNode中

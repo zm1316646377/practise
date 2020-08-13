@@ -11,5 +11,9 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="ExoMediaButton.PlayList">
+        <item name="android:src">@drawable/exo_controls_playlist</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
 
 </resources>
