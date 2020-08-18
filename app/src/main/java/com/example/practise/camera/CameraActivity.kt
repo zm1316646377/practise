@@ -1,10 +1,17 @@
 package com.example.practise.camera
 
+import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.graphics.Point
 import android.hardware.Camera
+import android.media.ExifInterface
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.Display
 import android.view.Surface
@@ -13,8 +20,10 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.example.practise.R
 import kotlinx.android.synthetic.main.activity_camera.*
+import java.io.File
+import java.io.OutputStream
 
-class CameraActivity : AppCompatActivity(), SurfaceHolder.Callback {
+class CameraActivity : AppCompatActivity(), SurfaceHolder.Callback, Camera.PreviewCallback {
 
     private lateinit var mHolder: SurfaceHolder
     private lateinit var mCamera: Camera
@@ -26,6 +35,59 @@ class CameraActivity : AppCompatActivity(), SurfaceHolder.Callback {
         mHolder = preview_view.holder.apply {
             addCallback(this@CameraActivity)
             setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
+        }
+        initListener()
+    }
+
+    private fun initListener() {
+        take_pic.setOnClickListener { view ->
+            mCamera.takePicture(null, null) { bytes: ByteArray, camera: Camera ->
+                // 只是为了完成demo, 实际应用大概应该在后台线程执行图片处理的逻辑
+
+                // 旋转视图, 如果屏幕竖直着拍照 采样的数据decode之后方向不对
+                var bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                val matrix = Matrix()
+                matrix.setRotate(90F)
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+
+                val picDirectoryPath = Environment.getExternalStorageDirectory().path + File.separator + "Pictures" + File.separator + "practise"
+                val picDirectory = File(picDirectoryPath)
+                if (!picDirectory.exists()) {
+                    picDirectory.mkdir()
+                }
+                val picPath = picDirectoryPath + File.separator + "IMG" + System.currentTimeMillis() + ".jpg"
+
+                val contentValues = ContentValues()
+                contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, "test.jpg");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/practise")
+                } else {
+                    contentValues.put(MediaStore.Images.Media.DATA, picPath);
+                }
+
+                contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/JPEG");
+                val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+
+                var os: OutputStream? = null
+                try {
+                    if (uri != null) {
+                        os = contentResolver.openOutputStream(uri)
+
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, os)
+                    }
+                } catch (e: Exception) {
+
+                } finally {
+                    os?.close()
+                }
+
+                val exifInterface = ExifInterface(picPath)
+                exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_ROTATE_90.toString())
+                exifInterface.saveAttributes()
+                val orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION,  ExifInterface.ORIENTATION_NORMAL)
+                Log.e("TEST", orientation.toString())
+                camera.startPreview()
+            }
         }
     }
 
@@ -39,13 +101,17 @@ class CameraActivity : AppCompatActivity(), SurfaceHolder.Callback {
         Log.e("TEST", "RESUME")
     }
 
-
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
 
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-
+        mCamera.apply {
+            stopPreview()
+            setPreviewCallback(null)
+            release()
+        }
+        mCamera
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
@@ -66,9 +132,17 @@ class CameraActivity : AppCompatActivity(), SurfaceHolder.Callback {
             cancelAutoFocus()
             setParameters(parameters)
             startPreview()
+            setPreviewCallback(this@CameraActivity)
         }
 
 //        handler.postDelayed(runnable, 1000)
+    }
+
+    override fun onPreviewFrame(data: ByteArray?, camera: Camera?) {
+//        https://blog.csdn.net/tinyzhao/article/details/52681600
+//        val canvas = mHolder.lockCanvas()
+//        val paint = Paint()
+//        canvas.drawArc(10F, 10F, 90F, 90F, 0F, 100F, true, paint)
     }
 
     // 设置预览方向
