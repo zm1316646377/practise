@@ -1,4 +1,4 @@
-package com.example.practise.coordinatordemo
+package com.example.practise.common
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -14,7 +14,9 @@ class BaseAdapter(private val context: Context): RecyclerView.Adapter<BaseAdapte
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_recycler, parent, false);
-        return BaseViewHolder(view)
+        return BaseViewHolder(
+            view
+        )
     }
 
     override fun getItemCount(): Int {
