@@ -10,7 +10,7 @@ import com.example.practise.R
 
 class BaseAdapter(private val context: Context): RecyclerView.Adapter<BaseAdapter.Companion.BaseViewHolder>() {
 
-    private var data: List<String> = mutableListOf("Kathy1", "Kathy2","Kathy3","Kathy4","Kathy","Kathy","Kathy","Kathy","Kathy","Kathy","Kathy","Kathy","Kathy","Kathy","Kathy")
+    private var data: List<String> = mutableListOf("Kathy1", "Kathy2","Kathy3","Kathy4","Kathy5","Kathy6","Kathy7","Kathy8","Kathy9","Kathy10","Kathy11","Kathy12","Kathy13","Kathy14","Kathy15")
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_recycler, parent, false);
