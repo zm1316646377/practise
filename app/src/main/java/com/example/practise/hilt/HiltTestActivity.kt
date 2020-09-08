@@ -1,4 +1,4 @@
-package com.example.practise.drawable
+package com.example.practise.hilt
 
 import android.content.SharedPreferences
 import android.os.Bundle

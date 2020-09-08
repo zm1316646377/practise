@@ -10,6 +10,7 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import com.example.practise.R;
@@ -89,6 +90,7 @@ public class XfermodeEraserView extends View {
                 mEventX = event.getX();
                 mEventY = event.getY();
                 mPath.moveTo(mEventX, mEventY);
+                postDelayed(mTask, 1000);
                 break;
             case MotionEvent.ACTION_MOVE:
                 float endX = (event.getX() - mEventX) / 2 + mEventX;
@@ -97,9 +99,36 @@ public class XfermodeEraserView extends View {
                 mPath.quadTo(mEventX, mEventY, endX, endY);
                 mEventX = event.getX();
                 mEventY = event.getY();
+                invalidate();
+                break;
+            case MotionEvent.ACTION_UP:
+                removeCallbacks(mTask);
                 break;
         }
-        invalidate();
         return true; //消费事件
     }
+
+    // 计算擦出的区域, 应该在子线程执行
+    private Runnable mTask = new Runnable() {
+        @Override
+        public void run() {
+            int width = getWidth();
+            int height = getHeight();
+
+            int totalArea = width * height;
+            int wipedArea = 0;
+
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    int pixel = mDstBmp.getPixel(x, y); // mDstBmp.getPixels(pixels[], 0, width, 0, 0, width, height);可以先一次性将pixel数据都读出来
+                    if (pixel != 0) {
+                        wipedArea++;
+                    }
+                }
+            }
+
+            postDelayed(mTask, 1000);
+            Log.e("TEST", "WipedArea is " + wipedArea * 100.0 / totalArea + "%");
+        }
+    };
 }
