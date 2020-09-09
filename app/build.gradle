@@ -44,6 +44,8 @@ dependencies {
 
     implementation 'com.google.android.exoplayer:exoplayer:2.11.7'
 
+    implementation 'com.youth.banner:banner:2.0.10'
+
     implementation "com.google.dagger:hilt-android:2.28-alpha"
     kapt "com.google.dagger:hilt-android-compiler:2.28-alpha"
     

@@ -3,7 +3,7 @@ package com.example.practise.recyclerview
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.practise.R
-import com.example.practise.common.BaseAdapter
+import com.example.practise.common.adapter.BaseAdapter
 import kotlinx.android.synthetic.main.activity_recyclerview_test.*
 
 // 测试GridView横向滚动分页

@@ -3,7 +3,7 @@ package com.example.practise.coordinatordemo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.practise.R
-import com.example.practise.common.BaseAdapter
+import com.example.practise.common.adapter.BaseAdapter
 import kotlinx.android.synthetic.main.activity_coordinator.*
 
 class CoordinatorActivity : AppCompatActivity() {

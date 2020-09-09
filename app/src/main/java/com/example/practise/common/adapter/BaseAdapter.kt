@@ -1,4 +1,4 @@
-package com.example.practise.common
+package com.example.practise.common.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
