@@ -3,6 +3,7 @@ package com.example.practise.common.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
+import kotlin.math.min
 
 class FlowLayout : ViewGroup {
 
@@ -13,14 +14,45 @@ class FlowLayout : ViewGroup {
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         // 获取元素padding
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
-        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
+        var widthSize = MeasureSpec.getSize(widthMeasureSpec)
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
-        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
+        var heightSize = MeasureSpec.getSize(heightMeasureSpec)
 
-        val childWidthSpec = MeasureSpec.makeMeasureSpec(widthSize - paddingLeft - paddingRight, widthMode)
-        val childHeightSpec = MeasureSpec.makeMeasureSpec(heightSize - paddingTop - paddingBottom, heightMode)
+        // 去掉padding后的spec
+        val parentWidthSpec = MeasureSpec.makeMeasureSpec(widthSize - paddingLeft - paddingRight, widthMode)
+        val parentHeightSpec = MeasureSpec.makeMeasureSpec(heightSize - paddingTop - paddingBottom, heightMode)
 
-        measureChildren(childWidthSpec, childHeightSpec)
+        var singleLine = true
+        var widthUsed = paddingLeft
+        var lineHeight = 0
+        var heightUsed = paddingTop
+
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            measureChild(child, parentWidthSpec, parentHeightSpec)
+
+            widthUsed += child.measuredWidth
+            if (widthUsed + paddingRight > widthSize) {
+                singleLine = false
+                widthUsed = paddingLeft + child.measuredWidth
+                heightUsed += lineHeight
+                lineHeight = child.measuredHeight
+            } else {
+                if (child.measuredHeight > lineHeight) {
+                    lineHeight = child.measuredHeight
+                }
+            }
+        }
+
+        heightUsed += lineHeight + paddingBottom
+
+        if (widthMode == MeasureSpec.AT_MOST || singleLine) {
+            widthSize = widthUsed + paddingRight
+        }
+
+        if (heightMode == MeasureSpec.AT_MOST) {
+            heightSize = min(heightSize, heightUsed)
+        }
 
         setMeasuredDimension(widthSize, heightSize)
     }
