@@ -46,9 +46,23 @@ dependencies {
 
     implementation 'com.youth.banner:banner:2.0.10'
 
+    // hilt
     implementation "com.google.dagger:hilt-android:2.28-alpha"
     kapt "com.google.dagger:hilt-android-compiler:2.28-alpha"
-    
+
+    // CameraX core library using the camera2 implementation
+    def camerax_version = "1.0.0-beta08"
+    // The following line is optional, as the core library is included indirectly by camera-camera2
+    // implementation "androidx.camera:camera-core:${camerax_version}"
+    implementation "androidx.camera:camera-camera2:${camerax_version}"
+    // If you want to additionally use the CameraX Lifecycle library
+    implementation "androidx.camera:camera-lifecycle:${camerax_version}"
+    // If you want to additionally use the CameraX View class
+    implementation "androidx.camera:camera-view:1.0.0-alpha15"
+
+    // If you want to additionally use the CameraX Extensions library
+    // implementation "androidx.camera:camera-extensions:1.0.0-alpha15"
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
