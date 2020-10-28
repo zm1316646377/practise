@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.practise.R
-import kotlinx.android.synthetic.main.activity_test_style_inject.*
+import kotlinx.android.synthetic.main.activity_test_js_inject.*
 
 // js结尾的";"不能丢
 private const val JS = "var style = document.createElement('style');" +
@@ -12,11 +12,11 @@ private const val JS = "var style = document.createElement('style');" +
                        "style.appendChild(document.createTextNode(\"body{color: red;}\"));" +
                        "document.body.appendChild(style);"
 
-class TestStyleInjectActivity : AppCompatActivity() {
+class TestJSInjectActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_test_style_inject)
+        setContentView(R.layout.activity_test_js_inject)
     }
 
     override fun onResume() {
